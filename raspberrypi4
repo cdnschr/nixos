@@ -1,0 +1,45 @@
+
+    fileSystems = {
+      "/" = {
+        device = "/dev/disk/by-label/NIXOS_SD";
+        fsType = "ext4";
+        options = [ "noatime" ];
+      };
+      #RAMDISK erstellen
+      "/mnt/ramdisk" = {
+        device = "/mnt/ramdisk";
+        fsType = "ramfs";
+      };
+    };
+    #Rechte setzen, damit RAMDISK nicht auf root läuft
+    systemd.tmpfiles.rules = [
+        "d /mnt/ramdisk 1755 bpp users "
+        ];
+    networking = {
+      hostName = hostname;
+      #wireless = {
+      #  enable = true;
+      #  networks."${SSID}".psk = SSIDpassword;
+      #  interfaces = [ interface ];
+      # };
+    };
+
+    time.timeZone = "Europe/Berlin";
+
+    environment.systemPackages = with pkgs; [ 
+        vim
+        python311
+        #apacheHttpd
+        nginx
+        fail2ban
+        htop
+        lm_sensors
+        #cron
+        rrdtool
+        libraspberrypi
+        icingaweb2
+        icinga2
+         ];
+
+    services.openssh.enable = true;
+
