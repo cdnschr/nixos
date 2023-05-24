@@ -1,0 +1,68 @@
+{
+systemd.timers."raspi-temp" = {
+  wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "1m";
+      OnUnitActiveSec = "5m";
+      Unit = "raspi-temp.service";
+    };
+};
+
+systemd.services."raspi-temp" = {
+#  path = [ pkgs.coreutils ];
+  script = ''
+        /bin/sh /home/bpp/monitoringskript.sh
+  '';
+  description = "Temperaturabfrage des Raspi";
+  serviceConfig = {
+    Type = "oneshot";
+    User= "root";
+  };
+};
+
+systemd.timers."raspi-copyrrd" = {
+  wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "60m";
+      OnUnitActiveSec = "120m";
+      Unit = "raspi-copyrrd.service";
+    };
+};
+
+systemd.services."raspi-copyrrd" = {
+  script = ''
+        /bin/sh /home/bpp/backuprrd.sh
+  '';
+  description = "Kopiert die rrd-DB auf SD";
+  serviceConfig = {
+    Type = "oneshot";
+    User= "root";
+  };
+};
+
+systemd.services."raspi-copybeforereboot" = {
+  wantedBy = [ "shutdown.target" "reboot.target" "halt.target" ];
+  script = ''
+        /bin/sh /home/bpp/backuprrd.sh
+  '';
+  description = "Kopiert die rrd-DB auf SD bei Shutdown/Neustart";
+  serviceConfig = {
+    Type = "oneshot";
+    User= "root";
+  };
+};
+
+systemd.services."raspi-copyonboot" = {
+  wantedBy = [ "multi-user.target" ];
+  script = ''
+        cp -r /home/bpp/intranet/* /mnt/ramdisk
+  '';
+  description = "Kopiert die rrd-DB von SD bei Shutdown/Neustart";
+  serviceConfig = {
+    Type = "oneshot";
+    User= "root";
+  };
+};
+
+
+}
